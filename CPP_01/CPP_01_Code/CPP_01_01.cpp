@@ -7,10 +7,16 @@ int main() {
     string name1;
     int age1;
     float gpa1;
+    int id1;
 
     string name2;
     int age2;
     float gpa2;
+    int id2;
+
+    string name3;
+    int age3;
+    float gpa3;
 
     cin >> name1;
     cin >> age1;
