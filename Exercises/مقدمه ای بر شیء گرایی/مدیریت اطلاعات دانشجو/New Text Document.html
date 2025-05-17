@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تمرین پیاده‌سازی کلاس: سیستم مدیریت اطلاعات دانشجو</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Vazir', 'Arial', sans-serif;
+            line-height: 1.8;
+            background-color: #f9fafb;
+            color: #1f2937;
+            direction: rtl;
+            text-align: right;
+        }
+        h1, h2, h3 {
+            color: #1e40af;
+            font-weight: bold;
+        }
+        pre, code {
+            background-color: #f3f4f6;
+            border-radius: 8px;
+            padding: 12px;
+            font-family: 'Courier New', monospace;
+            direction: ltr;
+            text-align: left;
+            overflow-x: auto;
+        }
+        .section {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .example {
+            background-color: #e0f2fe;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        ul, ol {
+            padding-right: 20px;
+        }
+        a {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="section">
+            <h1 class="text-3xl mb-4">تمرین پیاده‌سازی کلاس: سیستم مدیریت اطلاعات دانشجو</h1>
+            <p class="text-lg mb-4">این تمرین برای تقویت مفاهیم برنامه‌نویسی شیءگرا و پیاده‌سازی کلاس در زبان C++ طراحی شده است.</p>
+            <ul class="list-disc mb-4">
+                <li><strong>محدودیت زمان</strong>: ۱ ثانیه</li>
+                <li><strong>محدودیت حافظه</strong>: ۲۵۶ مگابایت</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2 class="text-2xl mb-3">شرح مسئله</h2>
+            <p class="mb-4">شما باید یک سیستم ساده برای مدیریت اطلاعات یک دانشجو پیاده‌سازی کنید. این سیستم شامل یک کلاس به نام <code>Student</code> است که اطلاعات دانشجو (نام، شماره دانشجویی و معدل) را ذخیره کرده و امکان انجام عملیات مختلفی مانند به‌روزرسانی معدل، بررسی وضعیت قبولی، افزودن جایزه به معدل، بازنشانی اطلاعات و مقایسه معدل را فراهم می‌کند.</p>
+
+            <h3 class="text-xl mb-2">مشخصات کلاس <code>Student</code></h3>
+
+            <h4 class="text-lg mb-1">ویژگی‌ها</h4>
+            <ul class="list-disc mb-4">
+                <li><code>name</code>: نام دانشجو (رشته، بدون فاصله، حداکثر ۱۰۰ کاراکتر).</li>
+                <li><code>studentId</code>: شماره دانشجویی (عدد صحیح مثبت).</li>
+                <li><code>gpa</code>: معدل دانشجو (عدد اعشاری در بازه‌ی [0, 20]).</li>
+            </ul>
+
+            <h4 class="text-lg mb-1">سازنده</h4>
+            <p class="mb-2">سازنده‌ای که سه پارامتر دریافت کند:</p>
+            <ul class="list-disc mb-4">
+                <li><code>name</code> (رشته): نام دانشجو.</li>
+                <li><code>studentId</code> (عدد صحیح): شماره دانشجویی.</li>
+                <li><code>gpa</code> (عدد اعشاری): معدل اولیه.</li>
+                <li>این مقادیر باید ویژگی‌های کلاس را مقداردهی کنند.</li>
+            </ul>
+
+            <h4 class="text-lg mb-1">مخرب</h4>
+            <p class="mb-2">مخربی که هنگام حذف شیء، پیام زیر را چاپ کند:</p>
+            <pre><code>Student with ID X is being deleted.</code></pre>
+            <p class="mb-4">که در آن <code>X</code> شماره دانشجویی است.</p>
+
+            <h4 class="text-lg mb-1">متدهای Getter</h4>
+            <ul class="list-disc mb-4">
+                <li><code>getName()</code>: مقدار <code>name</code> را برگرداند.</li>
+                <li><code>getStudentId()</code>: مقدار <code>studentId</code> را برگرداند.</li>
+                <li><code>getGpa()</code>: مقدار <code>gpa</code> را برگرداند.</li>
+            </ul>
+
+            <h4 class="text-lg mb-1">متدهای Setter</h4>
+            <ul class="list-disc mb-4">
+                <li><code>setName(string n)</code>: مقدار <code>name</code> را به <code>n</code> تغییر دهد.</li>
+                <li><code>setGpa(double g)</code>: مقدار <code>gpa</code> را به <code>g</code> تغییر دهد، مشروط بر اینکه 0 ≤ g ≤ 20. در صورت معتبر بودن، پیام زیر چاپ شود:
+                    <pre><code>GPA updated to X.</code></pre>
+                    که <code>X</code> معدل جدید با ۲ رقم اعشار است. در غیر این صورت، پیام زیر چاپ شود:
+                    <pre><code>Invalid GPA value.</code></pre>
+                </li>
+            </ul>
+
+            <h4 class="text-lg mb-1">سایر متدها</h4>
+            <ol class="list-decimal mb-4">
+                <li><code>updateGpa(double newGpa)</code>:
+                    <p class="mb-2">معدل را به <code>newGpa</code> تغییر دهد (با استفاده از منطق <code>setGpa</code> برای اعتبارسنجی و چاپ پیام).</p>
+                </li>
+                <li><code>isPassing()</code>:
+                    <p class="mb-2">اگر <code>gpa ≥ 12</code> باشد، پیام زیر چاپ شود:</p>
+                    <pre><code>Student is passing.</code></pre>
+                    <p class="mb-2">در غیر این صورت:</p>
+                    <pre><code>Student is failing.</code></pre>
+                </li>
+                <li><code>addBonusGpa(double bonus)</code>:
+                    <p class="mb-2">مقدار <code>bonus</code> را به <code>gpa</code> اضافه کند، مشروط بر اینکه:</p>
+                    <ul class="list-disc mb-2">
+                        <li><code>bonus ≥ 0</code></li>
+                        <li><code>gpa + bonus ≤ 20</code></li>
+                    </ul>
+                    <p class="mb-2">در صورت معتبر بودن، پیام زیر چاپ شود:</p>
+                    <pre><code>Bonus added, new GPA is X.</code></pre>
+                    <p class="mb-2">که <code>X</code> معدل جدید با ۲ رقم اعشار است. در غیر این صورت:</p>
+                    <pre><code>Invalid bonus value or exceeds GPA limit.</code></pre>
+                </li>
+                <li><code>resetStudent()</code>:
+                    <p class="mb-2">مقدار <code>name</code> را به <code>"Unknown"</code> و <code>gpa</code> را به <code>0</code> تغییر دهد و پیام زیر را چاپ کند:</p>
+                    <pre><code>Student data reset, GPA is 0.</code></pre>
+                </li>
+                <li><code>compareGpa(double value)</code>:
+                    <p class="mb-2">معدل را با <code>value</code> مقایسه کند و یکی از پیام‌های زیر را چاپ کند:</p>
+                    <ul class="list-disc mb-2">
+                        <li>اگر <code>gpa < value</code>:
+                            <pre><code>GPA is less than X.</code></pre>
+                        </li>
+                        <li>اگر <code>gpa = value</code>:
+                            <pre><code>GPA is equal to X.</code></pre>
+                        </li>
+                        <li>اگر <code>gpa > value</code>:
+                            <pre><code>GPA is greater than X.</code></pre>
+                        </li>
+                    </ul>
+                    <p class="mb-2">که <code>X</code> مقدار <code>value</code> با ۲ رقم اعشار است.</p>
+                </li>
+            </ol>
+        </div>
+
+        <div class="section">
+            <h3 class="text-xl mb-2">وظیفه شما</h3>
+            <p class="mb-4">برنامه‌ای بنویسید که:</p>
+            <ol class="list-decimal mb-4">
+                <li>کلاس <code>Student</code> را با مشخصات بالا پیاده‌سازی کند.</li>
+                <li>اطلاعات اولیه‌ی یک دانشجو (نام، شماره دانشجویی و معدل) را از ورودی بخواند و یک شیء از کلاس <code>Student</code> ایجاد کند.</li>
+                <li>تعداد عملیات (<code>q</code>) را از ورودی بخواند.</li>
+                <li>به تعداد <code>q</code> عملیات، دستورات را از ورودی بخواند و متد مربوطه را اجرا کند.</li>
+                <li>برای هر عملیات، پیام مناسب چاپ شود.</li>
+                <li>در انتها، پیام مخرب هنگام حذف شیء چاپ شود.</li>
+            </ol>
+        </div>
+
+        <div class="section">
+            <h2 class="text-2xl mb-3">فرمت ورودی</h2>
+            <p class="mb-4">ورودی شامل چند خط است:</p>
+            <ul class="list-disc mb-4">
+                <li><strong>خط اول</strong>:
+                    <p class="mb-2">سه مقدار جدا شده با فاصله:</p>
+                    <ul class="list-disc mb-2">
+                        <li>نام دانشجو (رشته بدون فاصله).</li>
+                        <li>شماره دانشجویی (عدد صحیح).</li>
+                        <li>معدل اولیه (عدد اعشاری).</li>
+                    </ul>
+                </li>
+                <li><strong>خط دوم</strong>:
+                    <p class="mb-2">یک عدد صحیح <code>q</code> (تعداد عملیات).</p>
+                </li>
+                <li><strong><code>q</code> خط بعدی</strong>:
+                    <p class="mb-2">هر خط یک عملیات را مشخص می‌کند:</p>
+                    <ul class="list-disc mb-2">
+                        <li><strong>عملیات ۱</strong>: عدد <code>1</code> و یک عدد اعشاری <code>newGpa</code> (اجرای <code>updateGpa(newGpa)</code>).</li>
+                        <li><strong>عملیات ۲</strong>: عدد <code>2</code> (اجرای <code>isPassing()</code>).</li>
+                        <li><strong>عملیات ۳</strong>: عدد <code>3</code> و یک عدد اعشاری <code>bonus</code> (اجرای <code>addBonusGpa(bonus)</code>).</li>
+                        <li><strong>عملیات ۴</strong>: عدد <code>4</code> (اجرای <code>resetStudent()</code>).</li>
+                        <li><strong>عملیات ۵</strong>: عدد <code>5</code> و یک عدد اعشاری <code>value</code> (اجرای <code>compareGpa(value)</code>).</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h3 class="text-xl mb-2">محدودیت‌ها</h3>
+            <ul class="list-disc mb-4">
+                <li><code>1 ≤ studentId ≤ 10^6</code></li>
+                <li><code>0 ≤ gpa, newGpa, bonus, value ≤ 20</code></li>
+                <li><code>1 ≤ q ≤ 100</code></li>
+                <li>نام دانشجو رشته‌ای بدون فاصله و حداکثر ۱۰۰ کاراکتر است.</li>
+                <li>مقادیر اعشاری ممکن است تا ۶ رقم اعشار داشته باشند.</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2 class="text-2xl mb-3">فرمت خروجی</h2>
+            <p class="mb-4">برای هر عملیات، پیام مرتبط با متد مربوطه چاپ شود:</p>
+            <ul class="list-disc mb-4">
+                <li><strong>عملیات ۱ (<code>updateGpa</code>)</strong>:
+                    <p class="mb-2">اگر معتبر باشد: <code>GPA updated to X.</code> (<code>X</code> معدل جدید با ۲ رقم اعشار).</p>
+                    <p class="mb-2">در غیر این صورت: <code>Invalid GPA value.</code></p>
+                </li>
+                <li><strong>عملیات ۲ (<code>isPassing</code>)</strong>:
+                    <p class="mb-2">اگر <code>gpa ≥ 12</code>: <code>Student is passing.</code></p>
+                    <p class="mb-2">در غیر این صورت: <code>Student is failing.</code></p>
+                </li>
+                <li><strong>عملیات ۳ (<code>addBonusGpa</code>)</strong>:
+                    <p class="mb-2">اگر معتبر باشد: <code>Bonus added, new GPA is X.</code> (<code>X</code> معدل جدید با ۲ رقم اعشار).</p>
+                    <p class="mb-2">در غیر این صورت: <code>Invalid bonus value or exceeds GPA limit.</code></p>
+                </li>
+                <li><strong>عملیات ۴ (<code>resetStudent</code>)</strong>:
+                    <p class="mb-2">همیشه: <code>Student data reset, GPA is 0.</code></p>
+                </li>
+                <li><strong>عملیات ۵ (<code>compareGpa</code>)</strong>:
+                    <p class="mb-2">بسته به مقایسه: <code>GPA is less than X.</code>، <code>GPA is equal to X.</code>، یا <code>GPA is greater than X.</code> (<code>X</code> مقدار ورودی با ۲ رقم اعشار).</p>
+                </li>
+                <li><strong>در انتها</strong>:
+                    <p class="mb-2">پیام مخرب: <code>Student with ID X is being deleted.</code> (<code>X</code> شماره دانشجویی).</p>
+                </li>
+            </ul>
+            <p class="mb-4">تمام اعداد اعشاری در خروجی باید با دقیقاً ۲ رقم اعشار چاپ شوند.</p>
+        </div>
+
+        <div class="section">
+            <h2 class="text-2xl mb-3">مثال‌ها</h2>
+
+            <div class="example">
+                <h3 class="text-xl mb-2">مثال ۱</h3>
+                <p class="mb-2"><strong>ورودی</strong>:</p>
+                <pre><code>Ali 12345 15.5
+5
+1 16.75
+2
+3 1.5
+4
+5 10.0</code></pre>
+                <p class="mb-2"><strong>خروجی</strong>:</p>
+                <pre><code>GPA updated to 16.75.
+Student is passing.
+Bonus added, new GPA is 18.25.
+Student data reset, GPA is 0.
+GPA is less than 10.00.
+Student with ID 12345 is being deleted.</code></pre>
+                <p class="mb-2"><strong>توضیحات</strong>:</p>
+                <ul class="list-disc mb-2">
+                    <li>دانشجو با نام <code>Ali</code>، شماره دانشجویی <code>12345</code> و معدل <code>15.5</code> ایجاد می‌شود.</li>
+                    <li>عملیات‌ها:
+                        <ol class="list-decimal mb-2">
+                            <li>معدل به <code>16.75</code> به‌روزرسانی می‌شود.</li>
+                            <li>معدل <code>16.75</code> بررسی می‌شود (قبول).</li>
+                            <li>جایزه <code>1.5</code> اضافه می‌شود، معدل به <code>18.25</code> می‌رسد.</li>
+                            <li>اطلاعات بازنشانی می‌شود (<code>name = "Unknown"</code>، <code>gpa = 0</code>).</li>
+                            <li>معدل <code>0</code> با <code>10.0</code> مقایسه می‌شود (کمتر است).</li>
+                        </ol>
+                    </li>
+                    <li>در انتها، پیام مخرب چاپ می‌شود.</li>
+                </ul>
+            </div>
+
+            <div class="example">
+                <h3 class="text-xl mb-2">مثال ۲</h3>
+                <p class="mb-2"><strong>ورودی</strong>:</p>
+                <pre><code>Sara 67890 11.0
+4
+3 10.0
+2
+1 21.0
+5 11.0</code></pre>
+                <p class="mb-2"><strong>خروجی</strong>:</p>
+                <pre><code>Invalid bonus value or exceeds GPA limit.
+Student is failing.
+Invalid GPA value.
+GPA is equal to 11.00.
+Student with ID 67890 is being deleted.</code></pre>
+                <p class="mb-2"><strong>توضیحات</strong>:</p>
+                <ul class="list-disc mb-2">
+                    <li>دانشجو با نام <code>Sara</code>، شماره دانشجویی <code>67890</code> و معدل <code>11.0</code> ایجاد می‌شود.</li>
+                    <li>عملیات‌ها:
+                        <ol class="list-decimal mb-2">
+                            <li>جایزه <code>10.0</code> نامعتبر است (معدل به <code>21.0</code> می‌رسد).</li>
+                            <li>معدل <code>11.0</code> بررسی می‌شود (مردود).</li>
+                            <li>معدل <code>21.0</code> نامعتبر است.</li>
+                            <li>معدل <code>11.0</code> با <code>11.0</code> مقایسه می‌شود (برابر).</li>
+                        </ol>
+                    </li>
+                    <li>در انتها، پیام مخرب چاپ می‌شود.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="text-2xl mb-3">نکات مهم</h2>
+            <ul class="list-disc mb-4">
+                <li>از استاندارد C++11 یا بالاتر استفاده کنید.</li>
+                <li>برای چاپ اعداد اعشاری، از <code>fixed</code> و <code>setprecision(2)</code> استفاده کنید.</li>
+                <li>ورودی‌ها معتبر فرض می‌شوند (مثلاً نام بدون فاصله، مقادیر در محدوده‌ی مشخص).</li>
+                <li>پیام مخرب باید در انتهای خروجی و پس از تمام عملیات‌ها چاپ شود.</li>
+                <li>متدها باید دقیقاً پیام‌های مشخص‌شده را چاپ کنند (بدون فضای اضافی یا تغییرات در متن).</li>
+                <li>نیازی به اعتبارسنجی مقادیر ورودی فراتر از آنچه در متدها مشخص شده نیست (مثلاً نیازی به بررسی منفی بودن <code>studentId</code> نیست).</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
