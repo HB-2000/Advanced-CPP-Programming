@@ -1,0 +1,255 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آموزش کار با فایل‌ها در C++</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        pre {
+            background: #272822;
+            color: #f8f8f2;
+            padding: 10px;
+            border-radius: 5px;
+            direction: ltr;
+            text-align: left;
+            position: relative;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .example, .question {
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .copy-btn:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>آموزش کار با فایل‌ها در C++</h1>
+        <p>در C++، برای کار با فایل‌ها از کتابخانه <code>fstream</code> استفاده می‌شود که امکان خواندن و نوشتن در فایل‌ها را فراهم می‌کند.</p>
+
+        <h2>ویژگی‌های کار با فایل‌ها</h2>
+        <ul>
+            <li>نوشتن در فایل: ذخیره داده‌ها در فایل با استفاده از <code>ofstream</code>.</li>
+            <li>خواندن از فایل: بازیابی داده‌ها از فایل با استفاده از <code>ifstream</code>.</li>
+            <li>مدیریت فایل: باز کردن، بستن، و بررسی وضعیت فایل با <code>fstream</code>.</li>
+        </ul>
+
+        <h2>شامل کردن کتابخانه</h2>
+        <div class="example">
+            <pre><code>#include &lt;fstream&gt;
+using namespace std;
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>برای کار با فایل‌ها، باید هدر <code>fstream</code> را شامل کنید.</p>
+        </div>
+
+        <h2>نوشتن در فایل</h2>
+        <div class="example">
+            <h3>مثال ۱: نوشتن متن در فایل</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+int main() {
+    ofstream outFile("output.txt");
+    if (outFile.is_open()) {
+        outFile << "Hello, this is a test file." << endl;
+        outFile << "Line 2: Writing to file." << endl;
+        outFile.close();
+        cout << "Data written to file." << endl;
+    } else {
+        cout << "Unable to open file." << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>این کد یک فایل متنی به نام <code>output.txt</code> ایجاد می‌کند و چند خط متن در آن می‌نویسد.</p>
+        </div>
+
+        <h2>خواندن از فایل</h2>
+        <div class="example">
+            <h3>مثال ۲: خواندن متن از فایل</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    ifstream inFile("output.txt");
+    string line;
+    if (inFile.is_open()) {
+        while (getline(inFile, line)) {
+            cout << line << endl;
+        }
+        inFile.close();
+    } else {
+        cout << "Unable to open file." << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>این کد محتوای فایل <code>output.txt</code> را خط به خط می‌خواند و چاپ می‌کند.</p>
+        </div>
+
+        <h2>کار با فایل به صورت ترکیبی</h2>
+        <div class="example">
+            <h3>مثال ۳: خواندن و نوشتن در یک فایل</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+int main() {
+    fstream file("data.txt", ios::in | ios::out | ios::app);
+    if (file.is_open()) {
+        // نوشتن در فایل
+        file << "Appending new data." << endl;
+        
+        // بازنشانی موقعیت به ابتدای فایل برای خواندن
+        file.seekg(0, ios::beg);
+        
+        // خواندن از فایل
+        string line;
+        while (getline(file, line)) {
+            cout << line << endl;
+        }
+        file.close();
+    } else {
+        cout << "Unable to open file." << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>این کد فایل را در حالت خواندن و نوشتن باز می‌کند، داده‌ای اضافه می‌کند و سپس محتوای فایل را می‌خواند.</p>
+        </div>
+
+        <h2>سوالات تمرینی</h2>
+        <div class="question">
+            <h3>سوال ۱: ذخیره اعداد در فایل</h3>
+            <p>برنامه‌ای بنویسید که اعداد ۱ تا ۱۰ را در یک فایل ذخیره کند.</p>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+int main() {
+    ofstream outFile("numbers.txt");
+    if (outFile.is_open()) {
+        for (int i = 1; i <= 10; ++i) {
+            outFile << i << endl;
+        }
+        outFile.close();
+        cout << "Numbers written to file." << endl;
+    } else {
+        cout << "Unable to open file." << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+        </div>
+
+        <div class="question">
+            <h3>سوال ۲: محاسبه مجموع اعداد در فایل</h3>
+            <p>برنامه‌ای بنویسید که اعلاموجود در یک فایل را خوانده و مجموع آن‌ها را محاسبه کند.</p>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+int main() {
+    ifstream inFile("numbers.txt");
+    int number, sum = 0;
+    if (inFile.is_open()) {
+        while (inFile >> number) {
+            sum += number;
+        }
+        inFile.close();
+        cout << "Sum of numbers: " << sum << endl;
+    } else {
+        cout << "Unable to open file." << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+        </div>
+
+        <script>
+            function copyCode(button) {
+                const code = button.previousElementSibling.textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    alert('کد با موفقیت کپی شد!');
+                }).catch(err => {
+                    console.error('خطا در کپی کردن کد:', err);
+                });
+            }
+        </script>
+    </div>
+</body>
+</html>

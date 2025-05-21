@@ -1,0 +1,325 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آموزش seekg، seekp، tellg و tellp در C++</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        pre {
+            background: #272822;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            direction: ltr;
+            text-align: left;
+            position: relative;
+            font-size: 14px;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .example, .question {
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        .copy-btn:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>آموزش seekg، seekp، tellg و tellp در C++</h1>
+        <p>توابع <code>seekg</code> و <code>seekp</code> برای جابجایی مکان‌نما (cursor) و توابع <code>tellg</code> و <code>tellp</code> برای دریافت موقعیت مکان‌نما در فایل‌های ورودی و خروجی استفاده می‌شوند. این توابع در کتابخانه <code>fstream</code> تعریف شده‌اند.</p>
+
+        <h2>ویژگی‌های seekg، seekp، tellg و tellp</h2>
+        <ul>
+            <li><code>seekg</code>: مکان‌نمای ورودی (input cursor) را برای خواندن از فایل جابجا می‌کند.</li>
+            <li><code>seekp</code>: مکان‌نمای خروجی (output cursor) را برای نوشتن در فایل جابجا می‌کند.</li>
+            <li><code>tellg</code>: موقعیت فعلی مکان‌نمای ورودی را (به صورت تعداد بایت از ابتدای فایل) برمی‌گرداند.</li>
+            <li><code>tellp</code>: موقعیت فعلی مکان‌نمای خروجی را برمی‌گرداند.</li>
+            <li>جهت‌ها: از <code>ios::beg</code> (ابتدا)، <code>ios::end</code> (انتها)، یا <code>ios::cur</code> (موقعیت فعلی) برای جابجایی استفاده می‌شود.</li>
+        </ul>
+
+        <h2>شامل کردن کتابخانه</h2>
+        <div class="example">
+            <pre><code>#include &lt;fstream&gt;
+using namespace std;
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>برای استفاده از این توابع، باید هدر <code>fstream</code> را شامل کنید.</p>
+        </div>
+
+        <h2>مثال‌های پایه</h2>
+        <div class="example">
+            <h3>مثال ۱: استفاده از seekp و tellp</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+int main() {
+    ofstream outFile("test.txt");
+    if (outFile.is_open()) {
+        outFile << "Hello, World!";
+        streampos pos = outFile.tellp();
+        cout << "Current output position: " << pos << endl;
+        outFile.seekp(7);
+        outFile << "C++";
+        outFile.close();
+        cout << "Data written to file." << endl;
+    } else {
+        cout << "Unable to open file." << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>این کد در فایل <code>test.txt</code> عبارت "Hello, C++!" را می‌نویسد و موقعیت مکان‌نمای خروجی را چاپ می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۲: استفاده از seekg و tellg</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    ifstream inFile("test.txt");
+    if (inFile.is_open()) {
+        inFile.seekg(7);
+        streampos pos = inFile.tellg();
+        cout << "Current input position: " << pos << endl;
+        string word;
+        inFile >> word;
+        cout << "Word read: " << word << endl;
+        inFile.close();
+    } else {
+        cout << "Unable to open file." << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>اگر فایل <code>test.txt</code> حاوی "Hello, C++!" باشد، این کد موقعیت مکان‌نما (7) و کلمه "C++" را چاپ می‌کند.</p>
+        </div>
+
+        <h2>استفاده پیشرفته</h2>
+        <div class="example">
+            <h3>مثال ۳: ترکیب seekg، seekp، tellg و tellp</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    fstream file("data.txt", ios::in | ios::out | ios::trunc);
+    if (file.is_open()) {
+        file << "1234567890";
+        cout << "Output position after writing: " << file.tellp() << endl;
+        file.seekp(-2, ios::end);
+        file << "XX";
+        file.seekg(0, ios::beg);
+        cout << "Input position at start: " << file.tellg() << endl;
+        string content;
+        getline(file, content);
+        cout << "File content: " << content << endl;
+        file.close();
+    } else {
+        cout << "Unable to open file." << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>این کد "12345678XX" را در فایل می‌نویسد و موقعیت‌های مکان‌نمای ورودی و خروجی را چاپ می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۴: محاسبه اندازه فایل با tellg</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+int main() {
+    ifstream inFile("test.txt");
+    if (inFile.is_open()) {
+        inFile.seekg(0, ios::end);
+        streampos size = inFile.tellg();
+        cout << "File size: " << size << " bytes" << endl;
+        inFile.close();
+    } else {
+        cout << "Unable to open file." << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>این کد اندازه فایل <code>test.txt</code> را با استفاده از <code>tellg</code> محاسبه می‌کند.</p>
+        </div>
+
+        <h2>سوالات تمرینی</h2>
+        <div class="question">
+            <h3>سوال ۱: جایگزینی کاراکتر در فایل</h3>
+            <p>برنامه‌ای بنویسید که کاراکتر پنجم یک فایل را با 'X' جایگزین کند.</p>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    fstream file("sample.txt", ios::in | ios::out | ios::trunc);
+    if (file.is_open()) {
+        file << "abcdefghij";
+        cout << "Output position after writing: " << file.tellp() << endl;
+        file.seekp(4);
+        file << 'X';
+        file.seekg(0, ios::beg);
+        string content;
+        getline(file, content);
+        cout << "File content: " << content << endl;
+        file.close();
+    } else {
+        cout << "Unable to open file." << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: "abcdXfg hij"</p>
+        </div>
+
+        <div class="question">
+            <h3>سوال ۲: خواندن از انتهای فایل</h3>
+            <p>برنامه‌ای بنویسید که ۵ کاراکتر آخر یک فایل را بخواند.</p>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    ifstream inFile("sample.txt");
+    if (inFile.is_open()) {
+        inFile.seekg(-5, ios::end);
+        streampos pos = inFile.tellg();
+        cout << "Reading from position: " << pos << endl;
+        string lastFive;
+        getline(inFile, lastFive);
+        cout << "Last 5 characters: " << lastFive << endl;
+        inFile.close();
+    } else {
+        cout << "Unable to open file." << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>اگر فایل حاوی "abcdefghij" باشد، خروجی "fghij" خواهد بود.</p>
+        </div>
+
+        <div class="question">
+            <h3>سوال ۳: بررسی موقعیت و تغییر محتوا</h3>
+            <p>برنامه‌ای بنویسید که موقعیت فعلی مکان‌نما را بررسی کرده و بخشی از فایل را تغییر دهد.</p>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    fstream file("modify.txt", ios::in | ios::out | ios::trunc);
+    if (file.is_open()) {
+        file << "Hello, World!";
+        streampos initialPos = file.tellp();
+        cout << "Initial output position: " << initialPos << endl;
+        file.seekp(6);
+        file << "C++";
+        file.seekg(0, ios::beg);
+        streampos readPos = file.tellg();
+        cout << "Read position at start: " << readPos << endl;
+        string content;
+        getline(file, content);
+        cout << "File content: " << content << endl;
+        file.close();
+    } else {
+        cout << "Unable to open file." << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>این کد عبارت "Hello, C++!" را در فایل می‌نویسد و موقعیت‌های مکان‌نما را چاپ می‌کند.</p>
+        </div>
+
+        <script>
+            function copyCode(button) {
+                const code = button.previousElementSibling.textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    alert('کد با موفقیت کپی شد!');
+                }).catch(err => {
+                    console.error('خطا در کپی کردن کد:', err);
+                });
+            }
+        </script>
+    </div>
+</body>
+</html>

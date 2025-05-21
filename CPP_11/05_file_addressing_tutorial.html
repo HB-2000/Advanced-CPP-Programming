@@ -1,0 +1,248 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آموزش آدرس‌دهی فایل‌ها در C++</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        pre {
+            background: #272822;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            direction: ltr;
+            text-align: left;
+            position: relative;
+            font-size: 14px;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .example, .question {
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        .copy-btn:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>آموزش آدرس‌دهی فایل‌ها در C++</h1>
+        <p>آدرس‌دهی فایل‌ها در C++ به معنای مشخص کردن مسیر فایل برای خواندن یا نوشتن با استفاده از کتابخانه <code>fstream</code> است. مسیر فایل می‌تواند به صورت <strong>مطلق</strong> یا <strong>نسبی</strong> باشد.</p>
+
+        <h2>انواع آدرس‌دهی فایل</h2>
+        <ul>
+            <li><strong>مسیر مطلق</strong>: مسیر کامل فایل از ریشه سیستم فایل (مثلاً <code>C:/folder/file.txt</code> در ویندوز یا <code>/home/user/file.txt</code> در لینوکس).</li>
+            <li><strong>مسیر نسبی</strong>: مسیر فایل نسبت به محل اجرای برنامه (مثلاً <code>./data/file.txt</code> یا <code>../file.txt</code>).</li>
+            <li><strong>نکات</strong>: در ویندوز از <code>\</code> یا <code>/</code> و در لینوکس/مک از <code>/</code> برای جدا کردن پوشه‌ها استفاده می‌شود. برای سازگاری، در C++ بهتر است از <code>/</code> استفاده کنید.</li>
+        </ul>
+
+        <h2>شامل کردن کتابخانه</h2>
+        <div class="example">
+            <pre><code>#include &lt;fstream&gt;
+using namespace std;
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>برای کار با فایل‌ها، باید هدر <code>fstream</code> را شامل کنید.</p>
+        </div>
+
+        <h2>مثال‌های پایه</h2>
+        <div class="example">
+            <h3>مثال ۱: استفاده از مسیر مطلق</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+int main() {
+    ofstream outFile("C:/Users/Public/data.txt"); // مسیر مطلق در ویندوز
+    if (outFile.is_open()) {
+        outFile << "Writing to absolute path." << endl;
+        outFile.close();
+        cout << "Data written to file." << endl;
+    } else {
+        cout << "Unable to open file." << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>این کد یک فایل در مسیر مطلق <code>C:/Users/Public/data.txt</code> ایجاد کرده و در آن می‌نویسد.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۲: استفاده از مسیر نسبی</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+int main() {
+    ofstream outFile("./data/output.txt"); // مسیر نسبی
+    if (outFile.is_open()) {
+        outFile << "Writing to relative path." << endl;
+        outFile.close();
+        cout << "Data written to file." << endl;
+    } else {
+        cout << "Unable to open file." << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>این کد یک فایل در پوشه <code>data</code> در همان دایرکتوری برنامه ایجاد می‌کند.</p>
+        </div>
+
+        <h2>استفاده پیشرفته</h2>
+        <div class="example">
+            <h3>مثال ۳: خواندن از فایل با مسیر نسبی و بررسی وجود فایل</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    ifstream inFile("../data/input.txt"); // مسیر نسبی به پوشه بالاتر
+    if (inFile.is_open()) {
+        string line;
+        while (getline(inFile, line)) {
+            cout << line << endl;
+        }
+        inFile.close();
+    } else {
+        cout << "Unable to open file." << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>این کد سعی می‌کند فایلی را از پوشه <code>data</code> در دایرکتوری بالاتر بخواند.</p>
+        </div>
+
+        <h2>سوالات تمرینی</h2>
+        <div class="question">
+            <h3>سوال ۱: نوشتن اعداد در فایل با مسیر نسبی</h3>
+            <p>برنامه‌ای بنویسید که اعداد ۱ تا ۵ را در فایلی در مسیر <code>./output/numbers.txt</code> ذخیره کند.</p>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+int main() {
+    ofstream outFile("./output/numbers.txt");
+    if (outFile.is_open()) {
+        for (int i = 1; i <= 5; ++i) {
+            outFile << i << endl;
+        }
+        outFile.close();
+        cout << "Numbers written to file." << endl;
+    } else {
+        cout << "Unable to open file." << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>این برنامه اعداد ۱ تا ۵ را در فایل <code>./output/numbers.txt</code> ذخیره می‌کند.</p>
+        </div>
+
+        <div class="question">
+            <h3>سوال ۲: خواندن و چاپ محتوای فایل با مسیر مطلق</h3>
+            <p>برنامه‌ای بنویسید که محتوای فایل <code>C:/Users/Public/input.txt</code> را بخواند و چاپ کند.</p>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    ifstream inFile("C:/Users/Public/input.txt");
+    if (inFile.is_open()) {
+        string line;
+        while (getline(inFile, line)) {
+            cout << line << endl;
+        }
+        inFile.close();
+    } else {
+        cout << "Unable to open file." << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>این برنامه محتوای فایل <code>C:/Users/Public/input.txt</code> را می‌خواند و چاپ می‌کند.</p>
+        </div>
+
+        <script>
+            function copyCode(button) {
+                const code = button.previousElementSibling.textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    alert('کد با موفقیت کپی شد!');
+                }).catch(err => {
+                    console.error('خطا در کپی کردن کد:', err);
+                });
+            }
+        </script>
+    </div>
+</body>
+</html>

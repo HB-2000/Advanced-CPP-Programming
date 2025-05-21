@@ -1,0 +1,235 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آموزش Vector در C++</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        pre {
+            background: #272822;
+            color: #f8f8f2;
+            padding: 10px;
+            border-radius: 5px;
+            direction: ltr;
+            text-align: left;
+            position: relative;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .example {
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .copy-btn:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>آموزش Vector در C++</h1>
+        <p>Vector یکی از کانتینرهای استاندارد در کتابخانه STL زبان C++ است که برای ذخیره و مدیریت آرایه‌های پویا استفاده می‌شود.</p>
+
+        <h2>ویژگی‌های Vector</h2>
+        <ul>
+            <li>اندازه پویا: می‌تواند به طور خودکار تغییر اندازه دهد.</li>
+            <li>دسترسی تصادفی: امکان دسترسی به عناصر با استفاده از اندیس.</li>
+            <li>مدیریت حافظه: تخصیص و آزادسازی حافظه به صورت خودکار.</li>
+        </ul>
+
+        <h2>شامل کردن کتابخانه</h2>
+        <div class="example">
+            <pre><code>#include &lt;vector&gt;
+using namespace std;
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>برای استفاده از Vector، باید هدر vector را در برنامه خود شامل کنید.</p>
+        </div>
+
+        <h2>ایجاد یک Vector</h2>
+        <div class="example">
+            <pre><code>#include &lt;vector&gt;
+#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; vec; // ایجاد یک vector خالی
+    vector&lt;int&gt; vec2(5, 100); // ایجاد vector با 5 عنصر با مقدار 100
+    vector&lt;int&gt; vec3 = {1, 2, 3, 4, 5}; // مقداردهی اولیه
+
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>روش‌های مختلف برای ایجاد یک vector نشان داده شده است.</p>
+        </div>
+
+        <h2>عملیات‌های اصلی</h2>
+        <div class="example">
+            <pre><code>#include &lt;vector&gt;
+#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; vec = {1, 2, 3};
+
+    vec.push_back(4); // افزودن عنصر به انتها
+    vec.pop_back(); // حذف عنصر آخر
+    vec[0] = 10; // تغییر عنصر با اندیس
+    int size = vec.size(); // گرفتن اندازه vector
+    bool empty = vec.empty(); // بررسی خالی بودن
+    vec.clear(); // حذف تمام عناصر
+
+    cout << "Size: " << size << ", Empty: " << empty << endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>عملیات‌های رایج شامل افزودن، حذف، تغییر و بررسی وضعیت vector.</p>
+        </div>
+
+        <h2>پیمایش Vector</h2>
+        <div class="example">
+            <pre><code>#include &lt;vector&gt;
+#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; vec = {1, 2, 3, 4, 5};
+
+    // پیمایش با حلقه for
+    for (size_t i = 0; i < vec.size(); i++) {
+        cout << vec[i] << " ";
+    }
+    cout << endl;
+
+    // پیمایش با iterator
+    for (auto it = vec.begin(); it != vec.end(); ++it) {
+        cout << *it << " ";
+    }
+    cout << endl;
+
+    // پیمایش با حلقه for-each
+    for (int x : vec) {
+        cout << x << " ";
+    }
+    cout << endl;
+
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>روش‌های مختلف پیمایش عناصر یک vector.</p>
+        </div>
+
+        <h2>مثال کاربردی</h2>
+        <div class="example">
+            <pre><code>#include &lt;vector&gt;
+#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; numbers;
+    
+    // افزودن اعداد به vector
+    for (int i = 1; i <= 5; ++i) {
+        numbers.push_back(i * 10);
+    }
+    
+    // چاپ اعداد
+    cout << "Numbers: ";
+    for (int num : numbers) {
+        cout << num << " ";
+    }
+    cout << endl;
+    
+    // محاسبه مجموع
+    int sum = 0;
+    for (int num : numbers) {
+        sum += num;
+    }
+    cout << "Sum: " << sum << endl;
+    
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>این مثال یک vector از اعداد ایجاد می‌کند، آن‌ها را چاپ می‌کند و مجموعشان را محاسبه می‌کند.</p>
+        </div>
+
+        <script>
+            function copyCode(button) {
+                const code = button.previousElementSibling.textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    alert('کد با موفقیت کپی شد!');
+                }).catch(err => {
+                    console.error('خطا در کپی کردن کد:', err);
+                });
+            }
+        </script>
+    </div>
+</body>
+</html>

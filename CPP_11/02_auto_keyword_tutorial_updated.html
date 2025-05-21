@@ -1,0 +1,249 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آموزش کلمه کلیدی auto در C++</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        pre {
+            background: #272822;
+            color: #f8f8f2;
+            padding: 10px;
+            border-radius: 5px;
+            direction: ltr;
+            text-align: left;
+            position: relative;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .example, .question {
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+        .copy-btn:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>آموزش کلمه کلیدی auto در C++</h1>
+        <p>کلمه کلیدی <code>auto</code> در C++ (از استاندارد C++11 به بعد) برای استنتاج خودکار نوع داده‌ها توسط کامپایلر استفاده می‌شود. این ویژگی کدنویسی را ساده‌تر و خواناتر می‌کند.</p>
+
+        <h2>ویژگی‌های auto</h2>
+        <ul>
+            <li>استنتاج نوع: کامپایلر نوع متغیر را از مقدار اولیه آن تشخیص می‌دهد.</li>
+            <li>خوانایی بهتر: کاهش نیاز به نوشتن نوع‌های پیچیده مانند iteratorها.</li>
+            <li>انعطاف‌پذیری: سازگار با تغییرات نوع داده بدون نیاز به تغییر کد.</li>
+        </ul>
+
+        <h2>مثال‌های پایه</h2>
+        <div class="example">
+            <h3>مثال ۱: استنتاج نوع‌های ساده</h3>
+            <pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+int main() {
+    auto x = 42; // استنتاج به int
+    auto y = 3.14; // استنتاج به double
+    auto str = "Hello"; // استنتاج به const char*
+    
+    cout << "x: " << x << ", y: " << y << ", str: " << str << endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>در این مثال، <code>auto</code> نوع متغیرها را از مقادیر اولیه آن‌ها استنتاج می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۲: استفاده با حلقه‌ها</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; vec = {1, 2, 3, 4, 5};
+    
+    for (auto x : vec) { // استنتاج به int
+        cout << x << " ";
+    }
+    cout << endl;
+    
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>استفاده از <code>auto</code> در حلقه for-each برای ساده‌سازی کد.</p>
+        </div>
+
+        <h2>استفاده پیشرفته</h2>
+        <div class="example">
+            <h3>مثال ۳: استفاده با Iteratorها</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; vec = {10, 20, 30};
+    
+    for (auto it = vec.begin(); it != vec.end(); ++it) {
+        cout << *it << " ";
+    }
+    cout << endl;
+    
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>استفاده از <code>auto</code> برای iteratorها، که نوع پیچیده <code>vector&lt;int&gt;::iterator</code> را ساده می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۴: استفاده با Templateها</h3>
+            <pre><code>#include &lt;iostream&gt;
+using namespace std;
+
+template&lt;typename T&gt;
+void print(T value) {
+    auto val = value; // استنتاج نوع از پارامتر template
+    cout << "Value: " << val << endl;
+}
+
+int main() {
+    print(42); // استنتاج به int
+    print(3.14); // استنتاج به double
+    print("Hello"); // استنتاج به const char*
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>استفاده از <code>auto</code> در توابع template برای انعطاف‌پذیری بیشتر.</p>
+        </div>
+
+        <h2>سوالات تمرینی</h2>
+        <div class="question">
+            <h3>سوال ۱: محاسبه میانگین با auto</h3>
+            <p>برنامه‌ای بنویسید که میانگین اعداد موجود در یک vector را با استفاده از <code>auto</code> محاسبه کند.</p>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; vec = {10, 20, 30, 40, 50};
+    auto sum = 0.0; // استنتاج به به double برای دقت
+    
+    for (auto x : vec) {
+        sum += x;
+    }
+    auto average = sum / vec.size();
+    
+    cout << "Average: " << average << endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+        </div>
+
+        <div class="question">
+            <h3>سوال ۲: فیلتر کردن اعداد مثبت</h3>
+            <p>برنامه‌ای بنویسید که اعداد مثبت را از یک vector جدا کرده و در vector دیگری ذخیره کند.</p>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; vec = {-1, 2, -3, 4, 5};
+    vector&lt;int&gt; positives;
+    
+    for (auto x : vec) {
+        if (x > 0) {
+            positives.push_back(x);
+        }
+    }
+    
+    for (auto x : positives) {
+        cout << x << " ";
+    }
+    cout << endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+        </div>
+
+        <script>
+            function copyCode(button) {
+                const code = button.previousElementSibling.textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    alert('کد با موفقیت کپی شد!');
+                }).catch(err => {
+                    console.error('خطا در کپی کردن کد:', err);
+                });
+            }
+        </script>
+    </div>
+</body>
+</html>
