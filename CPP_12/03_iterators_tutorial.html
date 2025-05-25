@@ -1,0 +1,335 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آموزش ایتوراتورها (Iterators) در C++</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        pre {
+            background: #272822;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            direction: ltr;
+            text-align: left;
+            position: relative;
+            font-size: 14px;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .example, .question {
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        .copy-btn:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>آموزش ایتوراتورها (Iterators) در C++</h1>
+        <p>ایتوراتورها در STL (کتابخانه قالب استاندارد) اشیایی هستند که برای پیمایش عناصر کانتینرها (مانند <code>vector</code>، <code>set</code>، <code>map</code>) استفاده می‌شوند. آن‌ها مانند اشاره‌گرها عمل می‌کنند و امکان دسترسی و تغییر عناصر را فراهم می‌کنند.</p>
+
+        <h2>انواع ایتوراتورها</h2>
+        <ul>
+            <li><strong>ورودی (Input Iterator)</strong>: فقط برای خواندن عناصر، حرکت رو به جلو (مثال: خواندن از جریان ورودی).</li>
+            <li><strong>خروجی (Output Iterator)</strong>: فقط برای نوشتن عناصر، حرکت رو به جلو (مثال: نوشتن در جریان خروجی).</li>
+            <li><strong>پیش‌رو (Forward Iterator)</strong>: خواندن و نوشتن، حرکت رو به جلو، تک‌جهته.</li>
+            <li><strong>دوطرفه (Bidirectional Iterator)</strong>: خواندن و نوشتن، حرکت رو به جلو و عقب (مثال: <code>list</code>، <code>set</code>).</li>
+            <li><strong>دسترسی تصادفی (Random Access Iterator)</strong>: خواندن و نوشتن، دسترسی مستقیم به هر عنصر (مثال: <code>vector</code>، <code>array</code>).</li>
+        </ul>
+        <p><strong>توابع کمکی</strong>: <code>begin()</code>، <code>end()</code> برای شروع و پایان کانتینر، <code>rbegin()</code>، <code>rend()</code> برای پیمایش معکوس.</p>
+
+        <h2>شامل کردن کتابخانه‌ها</h2>
+        <div class="example">
+            <pre><code>#include &lt;iterator&gt;
+#include &lt;vector&gt;
+#include &lt;set&gt;
+#include &lt;map&gt;
+using namespace std;
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>برای استفاده از ایتوراتورها، هدر <code>iterator</code> و هدرهای کانتینرها (مانند <code>vector</code>، <code>set</code>، <code>map</code>) را شامل کنید.</p>
+        </div>
+
+        <h2>مثال پایه</h2>
+        <div class="example">
+            <h3>مثال ۱: پیمایش vector با ایتوراتور</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; numbers = {1, 2, 3, 4, 5};
+
+    cout &lt;&lt; "Elements in vector:" &lt;&lt; endl;
+    for (auto it = numbers.begin(); it != numbers.end(); ++it) {
+        cout &lt;&lt; *it &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>1 2 3 4 5</code><br>این کد عناصر یک <code>vector</code> را با استفاده از ایتوراتور پیمایش و چاپ می‌کند.</p>
+        </div>
+
+        <h2>مثال‌های کاربردی</h2>
+        <div class="example">
+            <h3>مثال ۲: پیمایش معکوس set</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;set&gt;
+using namespace std;
+
+int main() {
+    set&lt;int&gt; numbers = {5, 2, 8, 1, 3};
+
+    cout &lt;&lt; "Elements in set (reverse order):" &lt;&lt; endl;
+    for (auto it = numbers.rbegin(); it != numbers.rend(); ++it) {
+        cout &lt;&lt; *it &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>8 5 3 2 1</code><br>این کد عناصر یک <code>set</code> را به‌صورت معکوس با ایتوراتورهای معکوس پیمایش می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۳: تغییر عناصر vector با ایتوراتور</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; numbers = {1, 2, 3, 4, 5};
+
+    // افزایش هر عنصر به اندازه 10
+    for (auto it = numbers.begin(); it != numbers.end(); ++it) {
+        *it += 10;
+    }
+
+    cout &lt;&lt; "Modified elements:" &lt;&lt; endl;
+    for (const auto&amp; num : numbers) {
+        cout &lt;&lt; num &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>11 12 13 14 15</code><br>این کد عناصر یک <code>vector</code> را با استفاده از ایتوراتور تغییر می‌دهد.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۴: پیمایش map با ایتوراتور</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    map&lt;string, int&gt; grades = {{"Alice", 90}, {"Bob", 85}, {"Charlie", 95}};
+
+    cout &lt;&lt; "Grades:" &lt;&lt; endl;
+    for (auto it = grades.begin(); it != grades.end(); ++it) {
+        cout &lt;&lt; it-&gt;first &lt;&lt; ": " &lt;&lt; it-&gt;second &lt;&lt; endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی:<br>
+                <code>Alice: 90</code><br>
+                <code>Bob: 85</code><br>
+                <code>Charlie: 95</code><br>
+                این کد جفت‌های کلید-مقدار یک <code>map</code> را با ایتوراتور پیمایش می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۵: استفاده از ایتوراتور برای کپی عناصر</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;iterator&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; source = {1, 2, 3, 4, 5};
+    vector&lt;int&gt; destination(5);
+
+    // کپی عناصر از source به destination
+    copy(source.begin(), source.end(), destination.begin());
+
+    cout &lt;&lt; "Copied elements:" &lt;&lt; endl;
+    for (const auto&amp; num : destination) {
+        cout &lt;&lt; num &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>1 2 3 4 5</code><br>این کد عناصر یک <code>vector</code> را با استفاده از ایتوراتورها و الگوریتم <code>copy</code> به <code>vector</code> دیگر کپی می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۶: خواندن کلمات از فایل با ایتوراتور</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;fstream&gt;
+#include &lt;vector&gt;
+#include &lt;string&gt;
+#include &lt;iterator&gt;
+using namespace std;
+
+int main() {
+    ifstream inFile("text.txt");
+    vector&lt;string&gt; words;
+
+    if (inFile.is_open()) {
+        // خواندن کلمات با استفاده از istream_iterator
+        istream_iterator&lt;string&gt; inIter(inFile), end;
+        copy(inIter, end, back_inserter(words));
+        inFile.close();
+
+        cout &lt;&lt; "Words from file:" &lt;&lt; endl;
+        for (const auto&amp; word : words) {
+            cout &lt;&lt; word &lt;&lt; " ";
+        }
+        cout &lt;&lt; endl;
+    } else {
+        cout &lt;&lt; "Unable to open file." &lt;&lt; endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>این کد کلمات را از فایل <code>text.txt</code> با استفاده از <code>istream_iterator</code> خوانده و در یک <code>vector</code> ذخیره می‌کند.</p>
+        </div>
+
+        <h2>سوالات تمرینی</h2>
+        <div class="question">
+            <h3>سوال ۱: فیلتر کردن اعداد زوج با ایتوراتور</h3>
+            <p>برنامه‌ای بنویسید که اعداد زوج را از یک <code>vector</code> با استفاده از ایتوراتور استخراج کرده و در <code>vector</code> جدید ذخیره کند.</p>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; numbers = {1, 2, 3, 4, 5, 6};
+    vector&lt;int&gt; evenNumbers;
+
+    for (auto it = numbers.begin(); it != numbers.end(); ++it) {
+        if (*it % 2 == 0) {
+            evenNumbers.push_back(*it);
+        }
+    }
+
+    cout &lt;&lt; "Even numbers:" &lt;&lt; endl;
+    for (const auto&amp; num : evenNumbers) {
+        cout &lt;&lt; num &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>2 4 6</code><br>این برنامه اعداد زوج را از <code>vector</code> استخراج کرده و در <code>vector</code> جدید ذخیره می‌کند.</p>
+        </div>
+
+        <div class="question">
+            <h3>سوال ۲: معکوس کردن عناصر vector با ایتوراتور</h3>
+            <p>برنامه‌ای بنویسید که عناصر یک <code>vector</code> را با استفاده از ایتوراتورهای معکوس چاپ کند.</p>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; numbers = {1, 2, 3, 4, 5};
+
+    cout &lt;&lt; "Elements in reverse order:" &lt;&lt; endl;
+    for (auto it = numbers.rbegin(); it != numbers.rend(); ++it) {
+        cout &lt;&lt; *it &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>5 4 3 2 1</code><br>این برنامه عناصر <code>vector</code> را به‌صورت معکوس با ایتوراتورهای معکوس چاپ می‌کند.</p>
+        </div>
+
+        <script>
+            function copyCode(button) {
+                const code = button.previousElementSibling.textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    alert('کد با موفقیت کپی شد!');
+                }).catch(err => {
+                    console.error('خطا در کپی کردن کد:', err);
+                });
+            }
+        </script>
+    </div>
+</body>
+</html>

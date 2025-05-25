@@ -1,0 +1,418 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آموزش مجموعه (set) در C++</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        pre {
+            background: #272822;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            direction: ltr;
+            text-align: left;
+            position: relative;
+            font-size: 14px;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .example, .question {
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        .copy-btn:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>آموزش مجموعه (set) در C++</h1>
+        <p>کلاس <code>set</code> در STL (کتابخانه قالب استاندارد) برای ذخیره مجموعه‌های مرتب از عناصر یکتا استفاده می‌شود. عناصر در <code>set</code> به‌صورت خودکار مرتب شده و تکراری‌ها حذف می‌شوند.</p>
+
+        <h2>ویژگی‌های set</h2>
+        <ul>
+            <li>ذخیره عناصر یکتا (تکراری‌ها نادیده گرفته می‌شوند).</li>
+            <li>مرتب‌سازی خودکار (به‌صورت پیش‌فرض صعودی).</li>
+            <li>ساختار داده: معمولاً به‌صورت درخت جستجوی باینری (مانند درخت قرمز-سیاه) پیاده‌سازی می‌شود.</li>
+            <li>عملیات اصلی: افزودن (<code>insert</code>)، حذف (<code>erase</code>)، جستجو (<code>find</code>، <code>count</code>).</li>
+            <li>قابلیت استفاده از مقایسه‌گر سفارشی (مثلاً <code>greater</code> برای ترتیب نزولی).</li>
+        </ul>
+
+        <h2>شامل کردن کتابخانه</h2>
+        <div class="example">
+            <pre><code>#include &lt;set&gt;
+using namespace std;
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>برای استفاده از <code>set</code>، باید هدر <code>set</code> را شامل کنید.</p>
+        </div>
+
+        <h2>مثال پایه</h2>
+        <div class="example">
+            <h3>مثال ۱: ذخیره و نمایش اعداد یکتا</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;set&gt;
+using namespace std;
+
+int main() {
+    set&lt;int&gt; numbers;
+    numbers.insert(5);
+    numbers.insert(2);
+    numbers.insert(5); // تکراری، نادیده گرفته می‌شود
+    numbers.insert(8);
+
+    cout << "Elements in set:" << endl;
+    for (const auto& num : numbers) {
+        cout << num << " ";
+    }
+    cout << endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>2 5 8</code><br>این کد یک <code>set</code> از اعداد یکتا ایجاد کرده و آن‌ها را به‌صورت مرتب‌شده چاپ می‌کند.</p>
+        </div>
+
+        <h2>مثال‌های کاربردی</h2>
+        <div class="example">
+            <h3>مثال ۲: حذف تکراری‌ها از آرایه</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;set&gt;
+using namespace std;
+
+int main() {
+    int arr[] = {4, 2, 4, 1, 3, 2};
+    int n = sizeof(arr) / sizeof(arr[0]);
+    set&lt;int&gt; uniqueNumbers(arr, arr + n);
+
+    cout << "Unique elements:" << endl;
+    for (const auto& num : uniqueNumbers) {
+        cout << num << " ";
+    }
+    cout << endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>1 2 3 4</code><br>این برنامه تکراری‌ها را از آرایه حذف کرده و عناصر یکتا را به‌صورت مرتب‌شده چاپ می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۳: جستجو و حذف با مقایسه‌گر سفارشی</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;set&gt;
+#include &lt;functional&gt;
+using namespace std;
+
+int main() {
+    set&lt;int, greater&lt;int&gt;&gt; numbers; // مرتب‌سازی نزولی
+    numbers.insert(5);
+    numbers.insert(2);
+    numbers.insert(8);
+
+    cout << "Elements in set (descending):" << endl;
+    for (const auto& num : numbers) {
+        cout << num << " ";
+    }
+    cout << endl;
+
+    // جستجوی عنصر
+    auto it = numbers.find(5);
+    if (it != numbers.end()) {
+        cout << "Found: " << *it << endl;
+    } else {
+        cout << "Element not found." << endl;
+    }
+
+    // حذف عنصر
+    numbers.erase(2);
+    cout << "After erasing 2:" << endl;
+    for (const auto& num : numbers) {
+        cout << num << " ";
+    }
+    cout << endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی:<br>
+                <code>Elements in set (descending): 8 5 2</code><br>
+                <code>Found: 5</code><br>
+                <code>After erasing 2: 8 5</code><br>
+                این کد یک <code>set</code> با ترتیب نزولی ایجاد کرده، عنصر ۵ را جستجو کرده و عنصر ۲ را حذف می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۴: بررسی وجود کلمات در مجموعه</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;set&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    set&lt;string&gt; dictionary = {"apple", "banana", "orange"};
+    string word;
+
+    cout << "Enter a word to check: ";
+    cin >> word;
+
+    if (dictionary.count(word)) {
+        cout << word << " exists in the dictionary." << endl;
+    } else {
+        cout << word << " does not exist in the dictionary." << endl;
+    }
+
+    cout << "Dictionary contents:" << endl;
+    for (const auto& w : dictionary) {
+        cout << w << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>این برنامه بررسی می‌کند که آیا یک کلمه در مجموعه کلمات وجود دارد و محتوای مجموعه را چاپ می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۵: ترکیب دو مجموعه (اتحاد)</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;set&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+
+int main() {
+    set&lt;int&gt; set1 = {1, 3, 5};
+    set&lt;int&gt; set2 = {2, 4, 5};
+    set&lt;int&gt; union_set;
+
+    // اتحاد دو مجموعه
+    set_union(set1.begin(), set1.end(), set2.begin(), set2.end(),
+              inserter(union_set, union_set.begin()));
+
+    cout << "Union of sets:" << endl;
+    for (const auto& num : union_set) {
+        cout << num << " ";
+    }
+    cout << endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>1 2 3 4 5</code><br>این برنامه اتحاد دو <code>set</code> را با استفاده از الگوریتم <code>set_union</code> محاسبه می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۶: یافتن اشتراک دو مجموعه</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;set&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+
+int main() {
+    set&lt;int&gt; set1 = {1, 3, 5, 7};
+    set&lt;int&gt; set2 = {3, 5, 9};
+    set&lt;int&gt; intersection_set;
+
+    // اشتراک دو مجموعه
+    set_intersection(set1.begin(), set1.end(), set2.begin(), set2.end(),
+                     inserter(intersection_set, intersection_set.begin()));
+
+    cout << "Intersection of sets:" << endl;
+    for (const auto& num : intersection_set) {
+        cout << num << " ";
+    }
+    cout << endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>3 5</code><br>این برنامه اشتراک دو <code>set</code> را با استفاده از الگوریتم <code>set_intersection</code> محاسبه می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۷: استخراج کاراکترهای یکتا از رشته</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;set&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    string text = "programming";
+    set&lt;char&gt; uniqueChars(text.begin(), text.end());
+
+    cout << "Unique characters in \"" << text << "\":" << endl;
+    for (const auto& ch : uniqueChars) {
+        cout << ch << " ";
+    }
+    cout << endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>a g i m n o p r</code><br>این برنامه کاراکترهای یکتا را از یک رشته استخراج کرده و به‌صورت مرتب‌شده چاپ می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۸: استخراج کلمات یکتا از فایل</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;set&gt;
+#include &lt;string&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+int main() {
+    ifstream inFile("text.txt");
+    set&lt;string&gt; uniqueWords;
+
+    if (inFile.is_open()) {
+        string word;
+        while (inFile >> word) {
+            uniqueWords.insert(word);
+        }
+        inFile.close();
+
+        cout << "Unique words in file:" << endl;
+        for (const auto& w : uniqueWords) {
+            cout << w << endl;
+        }
+    } else {
+        cout << "Unable to open file." << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>این برنامه کلمات یکتا را از فایل <code>text.txt</code> استخراج کرده و به‌صورت مرتب‌شده چاپ می‌کند.</p>
+        </div>
+
+        <h2>سوالات تمرینی</h2>
+        <div class="question">
+            <h3>سوال ۱: فیلتر کردن اعداد زوج</h3>
+            <p>برنامه‌ای بنویسید که از یک آرایه فقط اعداد زوج را در یک <code>set</code> ذخیره کند.</p>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;set&gt;
+using namespace std;
+
+int main() {
+    int arr[] = {1, 2, 3, 4, 4, 6, 7, 8};
+    int n = sizeof(arr) / sizeof(arr[0]);
+    set&lt;int&gt; evenNumbers;
+
+    for (int i = 0; i < n; ++i) {
+        if (arr[i] % 2 == 0) {
+            evenNumbers.insert(arr[i]);
+        }
+    }
+
+    cout << "Even numbers:" << endl;
+    for (const auto& num : evenNumbers) {
+        cout << num << " ";
+    }
+    cout << endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>2 4 6 8</code><br>این برنامه اعداد زوج یکتا را از آرایه استخراج کرده و به‌صورت مرتب‌شده چاپ می‌کند.</p>
+        </div>
+
+        <div class="question">
+            <h3>سوال ۲: بررسی وجود تمام عناصر یک آرایه در set</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;set&gt;
+using namespace std;
+
+int main() {
+    set&lt;int&gt; numbers = {1, 3, 5, 7};
+    int arr[] = {1, 3, 5};
+    int n = sizeof(arr) / sizeof(arr[0]);
+    bool allExist = true;
+
+    for (int i = 0; i < n; ++i) {
+        if (numbers.count(arr[i]) == 0) {
+            allExist = false;
+            break;
+        }
+    }
+
+    cout << "All elements exist in set: " << (allExist ? "Yes" : "No") << endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>Yes</code><br>این برنامه بررسی می‌کند که آیا تمام عناصر آرایه در <code>set</code> وجود دارند.</p>
+        </div>
+
+        <script>
+            function copyCode(button) {
+                const code = button.previousElementSibling.textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    alert('کد با موفقیت کپی شد!');
+                }).catch(err => {
+                    console.error('خطا در کپی کردن کد:', err);
+                });
+            }
+        </script>
+    </div>
+</body>
+</html>

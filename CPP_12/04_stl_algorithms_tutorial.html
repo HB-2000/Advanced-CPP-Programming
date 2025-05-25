@@ -1,0 +1,374 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آموزش الگوریتم‌های STL در C++</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        pre {
+            background: #272822;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            direction: ltr;
+            text-align: left;
+            position: relative;
+            font-size: 14px;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .example, .question {
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        .copy-btn:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>آموزش الگوریتم‌های STL در C++</h1>
+        <p>الگوریتم‌های STL (کتابخانه قالب استاندارد) مجموعه‌ای از توابع عمومی هستند که برای انجام عملیات روی کانتینرها (مانند <code>vector</code>، <code>set</code>، <code>array</code>) طراحی شده‌اند. این الگوریتم‌ها با استفاده از ایتوراتورها کار می‌کنند و عملیات‌هایی مانند مرتب‌سازی، جستجو، کپی، و عملیات مجموعه‌ای را ارائه می‌دهند.</p>
+
+        <h2>دسته‌بندی الگوریتم‌های STL</h2>
+        <ul>
+            <li><strong>الگوریتم‌های غیرتغییردهنده (Non-modifying)</strong>: عملیات بدون تغییر عناصر، مانند <code>find</code>، <code>count</code>.</li>
+            <li><strong>الگوریتم‌های تغییردهنده (Modifying)</strong>: تغییر عناصر یا ساختار کانتینر، مانند <code>copy</code>، <code>sort</code>، <code>transform</code>.</li>
+            <li><strong>الگوریتم‌های حذف (Removing)</strong>: حذف عناصر، مانند <code>remove</code>، <code>unique</code>.</li>
+            <li><strong>الگوریتم‌های مرتب‌سازی (Sorting)</strong>: مرتب‌سازی و عملیات مرتبط، مانند <code>sort</code>، <code>merge</code>.</li>
+            <li><strong>الگوریتم‌های مجموعه‌ای (Set)</strong>: عملیات روی مجموعه‌های مرتب‌شده، مانند <code>set_union</code>، <code>set_intersection</code>.</li>
+            <li><strong>الگوریتم‌های عددی (Numeric)</strong>: عملیات ریاضی، مانند <code>accumulate</code>، <code>inner_product</code>.</li>
+        </ul>
+        <p>توابع الگوریتم‌ها معمولاً در هدر <code>algorithm</code> تعریف شده‌اند. برخی عملیات عددی در هدر <code>numeric</code> قرار دارند.</p>
+
+        <h2>شامل کردن کتابخانه‌ها</h2>
+        <div class="example">
+            <pre><code>#include &lt;algorithm&gt;
+#include &lt;numeric&gt;
+#include &lt;vector&gt;
+#include &lt;set&gt;
+#include &lt;iterator&gt;
+using namespace std;
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>برای استفاده از الگوریتم‌های STL، هدر <code>algorithm</code> و برای عملیات عددی هدر <code>numeric</code> را شامل کنید.</p>
+        </div>
+
+        <h2>مثال پایه</h2>
+        <div class="example">
+            <h3>مثال ۱: جستجوی عنصر با find</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; numbers = {1, 2, 3, 4, 5};
+
+    auto it = find(numbers.begin(), numbers.end(), 3);
+    if (it != numbers.end()) {
+        cout &lt;&lt; "Found: " &lt;&lt; *it &lt;&lt; endl;
+    } else {
+        cout &lt;&lt; "Element not found." &lt;&lt; endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>Found: 3</code><br>این کد از الگوریتم <code>find</code> برای جستجوی عنصر ۳ در <code>vector</code> استفاده می‌کند.</p>
+        </div>
+
+        <h2>مثال‌های کاربردی</h2>
+        <div class="example">
+            <h3>مثال ۲: مرتب‌سازی vector با sort</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; numbers = {5, 2, 8, 1, 3};
+
+    sort(numbers.begin(), numbers.end());
+
+    cout &lt;&lt; "Sorted elements:" &lt;&lt; endl;
+    for (const auto&amp; num : numbers) {
+        cout &lt;&lt; num &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>1 2 3 5 8</code><br>این کد عناصر یک <code>vector</code> را به‌صورت صعودی با الگوریتم <code>sort</code> مرتب می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۳: مرتب‌سازی نزولی با مقایسه‌گر سفارشی</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; numbers = {5, 2, 8, 1, 3};
+
+    sort(numbers.begin(), numbers.end(), greater&lt;int&gt;());
+
+    cout &lt;&lt; "Sorted elements (descending):" &lt;&lt; endl;
+    for (const auto&amp; num : numbers) {
+        cout &lt;&lt; num &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>8 5 3 2 1</code><br>این کد عناصر یک <code>vector</code> را به‌صورت نزولی با استفاده از مقایسه‌گر <code>greater</code> مرتب می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۴: کپی عناصر با copy</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+#include &lt;iterator&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; source = {1, 2, 3, 4, 5};
+    vector&lt;int&gt; destination(5);
+
+    copy(source.begin(), source.end(), destination.begin());
+
+    cout &lt;&lt; "Copied elements:" &lt;&lt; endl;
+    for (const auto&amp; num : destination) {
+        cout &lt;&lt; num &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>1 2 3 4 5</code><br>این کد عناصر یک <code>vector</code> را به <code>vector</code> دیگر با الگوریتم <code>copy</code> کپی می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۵: حذف عناصر با remove</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; numbers = {1, 2, 3, 2, 4, 2, 5};
+
+    auto new_end = remove(numbers.begin(), numbers.end(), 2);
+
+    cout &lt;&lt; "Elements after removing 2:" &lt;&lt; endl;
+    for (auto it = numbers.begin(); it != new_end; ++it) {
+        cout &lt;&lt; *it &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>1 3 4 5</code><br>این کد تمام عناصر ۲ را از <code>vector</code> با الگوریتم <code>remove</code> حذف می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۶: یافتن اشتراک دو مجموعه با set_intersection</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; set1 = {1, 3, 5, 7};
+    vector&lt;int&gt; set2 = {3, 5, 9};
+    vector&lt;int&gt; intersection;
+
+    set_intersection(set1.begin(), set1.end(), set2.begin(), set2.end(),
+                     back_inserter(intersection));
+
+    cout &lt;&lt; "Intersection of sets:" &lt;&lt; endl;
+    for (const auto&amp; num : intersection) {
+        cout &lt;&lt; num &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>3 5</code><br>این کد اشتراک دو <code>vector</code> مرتب‌شده را با الگوریتم <code>set_intersection</code> محاسبه می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۷: محاسبه مجموع با accumulate</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;numeric&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; numbers = {1, 2, 3, 4, 5};
+
+    int sum = accumulate(numbers.begin(), numbers.end(), 0);
+
+    cout &lt;&lt; "Sum of elements: " &lt;&lt; sum &lt;&lt; endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>Sum of elements: 15</code><br>این کد مجموع عناصر یک <code>vector</code> را با الگوریتم <code>accumulate</code> محاسبه می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۸: تبدیل عناصر با transform</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+
+int square(int x) { return x * x; }
+
+int main() {
+    vector&lt;int&gt; numbers = {1, 2, 3, 4, 5};
+    vector&lt;int&gt; squared(numbers.size());
+
+    transform(numbers.begin(), numbers.end(), squared.begin(), square);
+
+    cout &lt;&lt; "Squared elements:" &lt;&lt; endl;
+    for (const auto&amp; num : squared) {
+        cout &lt;&lt; num &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>1 4 9 16 25</code><br>این کد عناصر یک <code>vector</code> را با تابع <code>square</code> به توان ۲ می‌رساند.</p>
+        </div>
+
+        <h2>سوالات تمرینی</h2>
+        <div class="question">
+            <h3>سوال ۱: شمارش اعداد زوج با count_if</h3>
+            <p>برنامه‌ای بنویسید که تعداد اعداد زوج در یک <code>vector</code> را با الگوریتم <code>count_if</code> محاسبه کند.</p>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+
+bool isEven(int x) { return x % 2 == 0; }
+
+int main() {
+    vector&lt;int&gt; numbers = {1, 2, 3, 4, 5, 6};
+
+    int evenCount = count_if(numbers.begin(), numbers.end(), isEven);
+
+    cout &lt;&lt; "Number of even elements: " &lt;&lt; evenCount &lt;&lt; endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>Number of even elements: 3</code><br>این برنامه تعداد اعداد زوج را در <code>vector</code> با <code>count_if</code> محاسبه می‌کند.</p>
+        </div>
+
+        <div class="question">
+            <h3>سوال ۲: جایگزینی عناصر با replace</h3>
+            <p>برنامه‌ای بنویسید که تمام عناصر ۳ را در یک <code>vector</code> با ۰ جایگزین کند.</p>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;vector&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+
+int main() {
+    vector&lt;int&gt; numbers = {1, 3, 3, 4, 5, 3};
+
+    replace(numbers.begin(), numbers.end(), 3, 0);
+
+    cout &lt;&lt; "Elements after replacing 3 with 0:" &lt;&lt; endl;
+    for (const auto&amp; num : numbers) {
+        cout &lt;&lt; num &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>1 0 0 4 5 0</code><br>این برنامه تمام عناصر ۳ را با ۰ در <code>vector</code> جایگزین می‌کند.</p>
+        </div>
+
+        <script>
+            function copyCode(button) {
+                const code = button.previousElementSibling.textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    alert('کد با موفقیت کپی شد!');
+                }).catch(err => {
+                    console.error('خطا در کپی کردن کد:', err);
+                });
+            }
+        </script>
+    </div>
+</body>
+</html>

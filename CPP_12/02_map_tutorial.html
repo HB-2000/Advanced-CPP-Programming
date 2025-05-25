@@ -1,0 +1,403 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آموزش نقشه (map) در C++</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        pre {
+            background: #272822;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            direction: ltr;
+            text-align: left;
+            position: relative;
+            font-size: 14px;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .example, .question {
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        .copy-btn:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>آموزش نقشه (map) در C++</h1>
+        <p>کلاس <code>map</code> در STL (کتابخانه قالب استاندارد) برای ذخیره جفت‌های کلید-مقدار (key-value) استفاده می‌شود، که کلیدها یکتا هستند و به‌صورت خودکار مرتب می‌شوند. <code>map</code> به شما امکان می‌دهد مقادیر را با استفاده از کلیدها به‌سرعت بازیابی کنید.</p>
+
+        <h2>ویژگی‌های map</h2>
+        <ul>
+            <li>ذخیره جفت‌های کلید-مقدار با کلیدهای یکتا.</li>
+            <li>مرتب‌سازی خودکار کلیدها (به‌صورت پیش‌فرض صعودی).</li>
+            <li>ساختار داده: معمولاً به‌صورت درخت جستجوی باینری (مانند درخت قرمز-سیاه) پیاده‌سازی می‌شود.</li>
+            <li>عملیات اصلی: افزودن/بروزرسانی (<code>insert</code>، <code>operator[]</code>)، حذف (<code>erase</code>)، جستجو (<code>find</code>، <code>count</code>).</li>
+            <li>قابلیت استفاده از مقایسه‌گر سفارشی (مثلاً <code>greater</code> برای ترتیب نزولی).</li>
+        </ul>
+
+        <h2>شامل کردن کتابخانه</h2>
+        <div class="example">
+            <pre><code>#include &lt;map&gt;
+using namespace std;
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>برای استفاده از <code>map</code>، باید هدر <code>map</code> را شامل کنید.</p>
+        </div>
+
+        <h2>مثال پایه</h2>
+        <div class="example">
+            <h3>مثال ۱: ذخیره و بازیابی نمرات دانشجویان</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    map&lt;string, int&gt; grades;
+    grades["Alice"] = 90;
+    grades["Bob"] = 85;
+    grades["Alice"] = 95; // بروزرسانی مقدار
+
+    cout << "Grades:" << endl;
+    for (const auto& pair : grades) {
+        cout << pair.first << ": " << pair.second << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی:<br>
+                <code>Alice: 95</code><br>
+                <code>Bob: 85</code><br>
+                این کد یک <code>map</code> برای ذخیره نمرات دانشجویان ایجاد کرده و آن‌ها را به‌صورت مرتب‌شده بر اساس نام چاپ می‌کند.</p>
+        </div>
+
+        <h2>مثال‌های کاربردی</h2>
+        <div class="example">
+            <h3>مثال ۲: شمارش تعداد تکرار کلمات</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    map&lt;string, int&gt; wordCount;
+    string words[] = {"apple", "banana", "apple", "orange", "banana"};
+    int n = sizeof(words) / sizeof(words[0]);
+
+    for (int i = 0; i < n; ++i) {
+        wordCount[words[i]]++;
+    }
+
+    cout << "Word counts:" << endl;
+    for (const auto& pair : wordCount) {
+        cout << pair.first << ": " << pair.second << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی:<br>
+                <code>apple: 2</code><br>
+                <code>banana: 2</code><br>
+                <code>orange: 1</code><br>
+                این برنامه تعداد تکرار هر کلمه را در یک آرایه با استفاده از <code>map</code> محاسبه می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۳: جستجو و حذف با مقایسه‌گر سفارشی</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;functional&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    map&lt;int, string, greater&lt;int&gt;&gt; reverseMap; // مرتب‌سازی نزولی کلیدها
+    reverseMap[1] = "One";
+    reverseMap[3] = "Three";
+    reverseMap[2] = "Two";
+
+    cout << "Map contents (descending keys):" << endl;
+    for (const auto& pair : reverseMap) {
+        cout << pair.first << ": " << pair.second << endl;
+    }
+
+    // جستجوی کلید
+    auto it = reverseMap.find(2);
+    if (it != reverseMap.end()) {
+        cout << "Found: " << it->first << " -> " << it->second << endl;
+    } else {
+        cout << "Key not found." << endl;
+    }
+
+    // حذف کلید
+    reverseMap.erase(3);
+    cout << "After erasing key 3:" << endl;
+    for (const auto& pair : reverseMap) {
+        cout << pair.first << ": " << pair.second << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی:<br>
+                <code>Map contents (descending keys):</code><br>
+                <code>3: Three</code><br>
+                <code>2: Two</code><br>
+                <code>1: One</code><br>
+                <code>Found: 2 -> Two</code><br>
+                <code>After erasing key 3:</code><br>
+                <code>2: Two</code><br>
+                <code>1: One</code><br>
+                این کد یک <code>map</code> با ترتیب نزولی کلیدها ایجاد کرده، کلید ۲ را جستجو کرده و کلید ۳ را حذف می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۴: ذخیره اطلاعات محصولات</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    map&lt;string, double&gt; products;
+    products["Laptop"] = 1000.0;
+    products["Phone"] = 500.0;
+    products["Tablet"] = 300.0;
+
+    cout << "Product prices:" << endl;
+    for (const auto& pair : products) {
+        cout << pair.first << ": $" << pair.second << endl;
+    }
+
+    string product;
+    cout << "Enter product name to check price: ";
+    cin >> product;
+    if (products.count(product)) {
+        cout << "Price of " << product << ": $" << products[product] << endl;
+    } else {
+        cout << "Product not found." << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>این برنامه قیمت محصولات را در یک <code>map</code> ذخیره کرده و امکان بررسی قیمت یک محصول را فراهم می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۵: شمارش کاراکترهای یکتا در رشته</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    string text = "programming";
+    map&lt;char, int&gt; charCount;
+
+    for (char c : text) {
+        charCount[c]++;
+    }
+
+    cout << "Character counts in \"" << text << "\":" << endl;
+    for (const auto& pair : charCount) {
+        cout << pair.first << ": " << pair.second << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی:<br>
+                <code>Character counts in "programming":</code><br>
+                <code>a: 1</code><br>
+                <code>g: 2</code><br>
+                <code>i: 1</code><br>
+                <code>m: 2</code><br>
+                <code>n: 1</code><br>
+                <code>o: 1</code><br>
+                <code>p: 1</code><br>
+                <code>r: 1</code><br>
+                این برنامه تعداد تکرار هر کاراکتر در یک رشته را با <code>map</code> محاسبه می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۶: استخراج کلمات و تعداد تکرار از فایل</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;string&gt;
+#include &lt;fstream&gt;
+using namespace std;
+
+int main() {
+    ifstream inFile("text.txt");
+    map&lt;string, int&gt; wordCount;
+
+    if (inFile.is_open()) {
+        string word;
+        while (inFile >> word) {
+            wordCount[word]++;
+        }
+        inFile.close();
+
+        cout << "Word counts in file:" << endl;
+        for (const auto& pair : wordCount) {
+            cout << pair.first << ": " << pair.second << endl;
+        }
+    } else {
+        cout << "Unable to open file." << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>این برنامه تعداد تکرار هر کلمه را در فایل <code>text.txt</code> با استفاده از <code>map</code> محاسبه و چاپ می‌کند.</p>
+        </div>
+
+        <h2>سوالات تمرینی</h2>
+        <div class="question">
+            <h3>سوال ۱: ذخیره و بروزرسانی امتیازات بازیکنان</h3>
+            <p>برنامه‌ای بنویسید که امتیازات بازیکنان را در یک <code>map</code> ذخیره کرده و امکان بروزرسانی امتیاز یک بازیکن را فراهم کند.</p>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    map&lt;string, int&gt; scores;
+    scores["Player1"] = 100;
+    scores["Player2"] = 150;
+
+    cout << "Initial scores:" << endl;
+    for (const auto& pair : scores) {
+        cout << pair.first << ": " << pair.second << endl;
+    }
+
+    string player = "Player1";
+    scores[player] += 50; // بروزرسانی امتیاز
+
+    cout << "Updated scores:" << endl;
+    for (const auto& pair : scores) {
+        cout << pair.first << ": " << pair.second << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی:<br>
+                <code>Initial scores:</code><br>
+                <code>Player1: 100</code><br>
+                <code>Player2: 150</code><br>
+                <code>Updated scores:</code><br>
+                <code>Player1: 150</code><br>
+                <code>Player2: 150</code><br>
+                این برنامه امتیازات را ذخیره کرده و امتیاز <code>Player1</code> را بروزرسانی می‌کند.</p>
+        </div>
+
+        <div class="question">
+            <h3>سوال ۲: بررسی وجود کلید در map</h3>
+            <p>برنامه‌ای بنویسید که بررسی کند آیا کلیدی در یک <code>map</code> وجود دارد و مقدار مرتبط را چاپ کند.</p>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;map&gt;
+#include &lt;string&gt;
+using namespace std;
+
+int main() {
+    map&lt;string, int&gt; inventory = {{"apple", 10}, {"banana", 20}};
+    string item;
+
+    cout << "Enter item to check: ";
+    cin >> item;
+
+    auto it = inventory.find(item);
+    if (it != inventory.end()) {
+        cout << "Found: " << it->first << " -> " << it->second << endl;
+    } else {
+        cout << "Item not found." << endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>این برنامه بررسی می‌کند که آیا یک آیتم در <code>map</code> وجود دارد و مقدار آن را چاپ می‌کند.</p>
+        </div>
+
+        <script>
+            function copyCode(button) {
+                const code = button.previousElementSibling.textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    alert('کد با موفقیت کپی شد!');
+                }).catch(err => {
+                    console.error('خطا در کپی کردن کد:', err);
+                });
+            }
+        </script>
+    </div>
+</body>
+</html>
