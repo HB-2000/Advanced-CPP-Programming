@@ -1,0 +1,372 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آموزش لیست (list) در C++</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        pre {
+            background: #272822;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            direction: ltr;
+            text-align: left;
+            position: relative;
+            font-size: 14px;
+        }
+        code {
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .example, .question {
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+        .copy-btn:hover {
+            background: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>آموزش لیست (list) در C++</h1>
+        <p>کلاس <code>list</code> در STL (کتابخانه قالب استاندارد) یک کانتینر دوطرفه است که امکان افزودن و حذف سریع عناصر در ابتدا و انتها را فراهم می‌کند. برخلاف <code>vector</code>، دسترسی تصادفی ندارد، اما برای عملیات درج و حذف در وسط لیست مناسب است.</p>
+
+        <h2>ویژگی‌های list</h2>
+        <ul>
+            <li>ساختار داده: لیست دوطرفه پیوندی (Doubly Linked List).</li>
+            <li>دسترسی: فقط پیمایش متوالی (با ایتوراتورهای دوطرفه).</li>
+            <li>عملیات سریع: افزودن (<code>push_front</code>، <code>push_back</code>)، حذف (<code>pop_front</code>، <code>pop_back</code>)، درج و حذف در هر موقعیت.</li>
+            <li>عملیات اختصاصی: مرتب‌سازی (<code>sort</code>)، حذف تکراری‌ها (<code>unique</code>)، ادغام (<code>merge</code>)، معکوس کردن (<code>reverse</code>).</li>
+            <li>عدم پشتیبانی از دسترسی تصادفی: نمی‌توان از <code>operator[]</code> استفاده کرد.</li>
+        </ul>
+
+        <h2>شامل کردن کتابخانه</h2>
+        <div class="example">
+            <pre><code>#include &lt;list&gt;
+#include &lt;iostream&gt;
+using namespace std;
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>برای استفاده از <code>list</code>، هدر <code>list</code> را شامل کنید.</p>
+        </div>
+
+        <h2>مثال پایه</h2>
+        <div class="example">
+            <h3>مثال ۱: افزودن و نمایش عناصر در list</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;list&gt;
+using namespace std;
+
+int main() {
+    list&lt;int&gt; numbers;
+    numbers.push_back(5);
+    numbers.push_back(2);
+    numbers.push_front(3);
+
+    cout &lt;&lt; "Elements in list:" &lt;&lt; endl;
+    for (const auto&amp; num : numbers) {
+        cout &lt;&lt; num &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>3 5 2</code><br>این کد یک <code>list</code> ایجاد کرده و عناصر را در ابتدا و انتها اضافه می‌کند.</p>
+        </div>
+
+        <h2>مثال‌های کاربردی</h2>
+        <div class="example">
+            <h3>مثال ۲: حذف عناصر از ابتدا و انتها</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;list&gt;
+using namespace std;
+
+int main() {
+    list&lt;int&gt; numbers = {1, 2, 3, 4, 5};
+
+    numbers.pop_front(); // حذف اولین عنصر
+    numbers.pop_back();  // حذف آخرین عنصر
+
+    cout &lt;&lt; "Elements after pop:" &lt;&lt; endl;
+    for (const auto&amp; num : numbers) {
+        cout &lt;&lt; num &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>2 3 4</code><br>این کد اولین و آخرین عنصر را از <code>list</code> حذف می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۳: مرتب‌سازی list</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;list&gt;
+using namespace std;
+
+int main() {
+    list&lt;int&gt; numbers = {5, 2, 8, 1, 3};
+
+    numbers.sort();
+
+    cout &lt;&lt; "Sorted elements:" &lt;&lt; endl;
+    for (const auto&amp; num : numbers) {
+        cout &lt;&lt; num &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>1 2 3 5 8</code><br>این کد عناصر <code>list</code> را به‌صورت صعودی با متد <code>sort</code> مرتب می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۴: حذف تکراری‌ها با unique</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;list&gt;
+using namespace std;
+
+int main() {
+    list&lt;int&gt; numbers = {1, 2, 2, 3, 3, 4};
+
+    numbers.sort(); // unique نیاز به لیست مرتب دارد
+    numbers.unique();
+
+    cout &lt;&lt; "Unique elements:" &lt;&lt; endl;
+    for (const auto&amp; num : numbers) {
+        cout &lt;&lt; num &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>1 2 3 4</code><br>این کد عناصر تکراری را از <code>list</code> مرتب‌شده با متد <code>unique</code> حذف می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۵: معکوس کردن list</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;list&gt;
+using namespace std;
+
+int main() {
+    list&lt;int&gt; numbers = {1, 2, 3, 4, 5};
+
+    numbers.reverse();
+
+    cout &lt;&lt; "Reversed elements:" &lt;&lt; endl;
+    for (const auto&amp; num : numbers) {
+        cout &lt;&lt; num &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>5 4 3 2 1</code><br>این کد ترتیب عناصر <code>list</code> را با متد <code>reverse</code> معکوس می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۶: ادغام دو list با merge</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;list&gt;
+using namespace std;
+
+int main() {
+    list&lt;int&gt; list1 = {1, 3, 5};
+    list&lt;int&gt; list2 = {2, 4, 6};
+
+    list1.sort();
+    list2.sort();
+    list1.merge(list2);
+
+    cout &lt;&lt; "Merged list:" &lt;&lt; endl;
+    for (const auto&amp; num : list1) {
+        cout &lt;&lt; num &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>1 2 3 4 5 6</code><br>این کد دو <code>list</code> مرتب‌شده را با متد <code>merge</code> ادغام می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۷: درج عنصر در موقعیت خاص</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;list&gt;
+using namespace std;
+
+int main() {
+    list&lt;int&gt; numbers = {1, 2, 4, 5};
+
+    auto it = numbers.begin();
+    advance(it, 2); // حرکت به موقعیت سوم
+    numbers.insert(it, 3);
+
+    cout &lt;&lt; "Elements after insertion:" &lt;&lt; endl;
+    for (const auto&amp; num : numbers) {
+        cout &lt;&lt; num &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>1 2 3 4 5</code><br>این کد عنصر ۳ را در موقعیت سوم <code>list</code> درج می‌کند.</p>
+        </div>
+
+        <div class="example">
+            <h3>مثال ۸: حذف عنصر خاص با remove</h3>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;list&gt;
+using namespace std;
+
+int main() {
+    list&lt;int&gt; numbers = {1, 2, 3, 2, 4, 2};
+
+    numbers.remove(2);
+
+    cout &lt;&lt; "Elements after removing 2:" &lt;&lt; endl;
+    for (const auto&amp; num : numbers) {
+        cout &lt;&lt; num &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>1 3 4</code><br>این کد تمام عناصر ۲ را از <code>list</code> با متد <code>remove</code> حذف می‌کند.</p>
+        </div>
+
+        <h2>سوالات تمرینی</h2>
+        <div class="question">
+            <h3>سوال ۱: فیلتر کردن اعداد زوج</h3>
+            <p>برنامه‌ای بنویسید که اعداد زوج را از یک <code>list</code> استخراج کرده و در <code>list</code> جدید ذخیره کند.</p>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;list&gt;
+using namespace std;
+
+int main() {
+    list&lt;int&gt; numbers = {1, 2, 3, 4, 5, 6};
+    list&lt;int&gt; evenNumbers;
+
+    for (const auto&amp; num : numbers) {
+        if (num % 2 == 0) {
+            evenNumbers.push_back(num);
+        }
+    }
+
+    cout &lt;&lt; "Even numbers:" &lt;&lt; endl;
+    for (const auto&amp; num : evenNumbers) {
+        cout &lt;&lt; num &lt;&lt; " ";
+    }
+    cout &lt;&lt; endl;
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>2 4 6</code><br>این برنامه اعداد زوج را از <code>list</code> استخراج کرده و در <code>list</code> جدید ذخیره می‌کند.</p>
+        </div>
+
+        <div class="question">
+            <h3>سوال ۲: بررسی وجود عنصر در list</h3>
+            <p>برنامه‌ای بنویسید که بررسی کند آیا عنصر خاصی در <code>list</code> وجود دارد.</p>
+            <pre><code>#include &lt;iostream&gt;
+#include &lt;list&gt;
+#include &lt;algorithm&gt;
+using namespace std;
+
+int main() {
+    list&lt;int&gt; numbers = {1, 2, 3, 4, 5};
+    int target = 3;
+
+    auto it = find(numbers.begin(), numbers.end(), target);
+    if (it != numbers.end()) {
+        cout &lt;&lt; "Element " &lt;&lt; target &lt;&lt; " found." &lt;&lt; endl;
+    } else {
+        cout &lt;&lt; "Element " &lt;&lt; target &lt;&lt; " not found." &lt;&lt; endl;
+    }
+    return 0;
+}
+            </code><button class="copy-btn" onclick="copyCode(this)">کپی کد</button></pre>
+            <p>خروجی: <code>Element 3 found.</code><br>این برنامه بررسی می‌کند که آیا عنصر ۳ در <code>list</code> وجود دارد.</p>
+        </div>
+
+        <script>
+            function copyCode(button) {
+                const code = button.previousElementSibling.textContent;
+                navigator.clipboard.writeText(code).then(() => {
+                    alert('کد با موفقیت کپی شد!');
+                }).catch(err => {
+                    console.error('خطا در کپی کردن کد:', err);
+                });
+            }
+        </script>
+    </div>
+</body>
+</html>
